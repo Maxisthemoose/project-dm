@@ -1,15 +1,24 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Socket } from "socket.io-client";
 import { useAuthUser } from "react-auth-kit";
 import { useParams } from "react-router-dom";
+import Draggable from "react-draggable";
+import { ReactComponent as Close } from "../../icons/close.svg";
+import { ReactComponent as Menu } from "../../icons/menu-icon.svg";
+import Popup from "reactjs-popup";
+import { ReactComponent as ChatBubble } from "../../icons/chat-bubble.svg";
+import ScrollToBottom from "react-scroll-to-bottom";
 import "./Chat.css";
 
-export default function Chat({ socket, users, messages }: { socket: Socket; users: any[]; messages: any[] }) {
+const contentStyle = { background: 'rgb(25, 25, 25)' };
+const arrowStyle = { color: 'rgb(25, 25, 25)' };
+
+export default function Chat({ socket, users, messages, setChatOpen }: { socket: Socket; users: any[]; messages: any[], setChatOpen: Function }) {
   const authUser = useAuthUser();
   const params = useParams();
   const [selectedUser, setSelectedUser] = useState("all");
   const [messageHistory, setMessageHistory] = useState(messages);
-  const [chatOpen, setChatOpen] = useState(true);
+  const [usersOpen, setUsersOpen] = useState(false);
 
   function sendMessage(ev: React.FormEvent<HTMLFormElement>) {
     ev.preventDefault();
@@ -35,9 +44,7 @@ export default function Chat({ socket, users, messages }: { socket: Socket; user
   useEffect(() => {
     socket.emit("get_messages", params.id);
     socket.on("recieve_messages", (messages) => {
-      console.log(messages);
       setMessageHistory(messages);
-      // socket.off("recieve_messages");
     });
 
     socket.on("recieve_dm", (data) => {
@@ -49,17 +56,42 @@ export default function Chat({ socket, users, messages }: { socket: Socket; user
 
   return (
     <>
-      <div className="chat-toolbar" onClick={() => setChatOpen(!chatOpen)}>
-        X
-      </div>
-      {chatOpen ?
+      <Draggable handle=".chat-header">
         <div className="chat-wrapper">
           <div className="chat-header">
-            <div className="where" onClick={() => setSelectedUser("all")}>Global</div>
-            {users.filter(u => u.username !== authUser()!.username).map(user => (
-              <div className="where" onClick={() => user.username !== authUser()!.username ? setSelectedUser(user.username) : "all"}>{user.username}</div>
-            ))}
+            <Close onClick={() => setChatOpen(false)} className="close-chat" />
+            {/* <Menu onClick={() => setUsersOpen(false)} onTouchStart={() => setUsersOpen(false)} className="open-close-users" /> */}
+            <Popup
+              trigger={
+                <Menu className="open-close-users" />
+              }
+              // open={true}
+              arrowStyle={arrowStyle}
+              contentStyle={contentStyle}
+              modal={false}
+              closeOnDocumentClick={true}
+              closeOnEscape={true}
+              position={"left top"}
+              repositionOnResize={true}
+              on={["hover", "click", "focus"]}
+            // defaultOpen
+
+            >
+              <div className="where global-where" onClick={() => setSelectedUser("all")}>Global Chat</div>
+              {users.filter(u => u.username !== authUser()!.username).map((user, i, a) => (
+                <div className={"where" + (i === a.length - 1 ? " last-where" : "")} onClick={() =>
+                  user.username !== authUser()!.username ? setSelectedUser(user.username) : "all"}
+                  onTouchStart={() =>
+                    user.username !== authUser()!.username ? setSelectedUser(user.username) : "all"}
+                >
+                  {user.username}
+                </div>
+              ))}
+
+
+            </Popup>
           </div>
+          {/* <ScrollToBottom className="chat-body" checkInterval={17}> */}
           <div className="chat-body">
             {
               messageHistory.map(v => (
@@ -94,6 +126,7 @@ export default function Chat({ socket, users, messages }: { socket: Socket; user
               ))
             }
           </div>
+          {/* </ScrollToBottom> */}
           <div className="chat-footer">
             <form className="chat-form" onSubmit={sendMessage} >
               <input className="message-box" type="text" id="message" name="message" placeholder={`Send a message to ${selectedUser}`} />
@@ -101,7 +134,7 @@ export default function Chat({ socket, users, messages }: { socket: Socket; user
             </form>
           </div>
         </div>
-        : ""}
+      </Draggable>
     </>
   )
 }

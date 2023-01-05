@@ -35,11 +35,10 @@ export default function Login() {
     const res = await login({ usernameOrEmail, password }) as any;
     const loginData = res?.data;
     if (!loginData) {
-      console.log(res.response.data.message);
+      // console.log(res.response.data.message);
       setError(res.response.data.message);
       setTimeout(() => setError(""), 5000);
     } else {
-      alert(JSON.stringify(loginData));
       if (signIn({
         token: loginData.accessToken,
         expiresIn: loginData.expiresIn,

@@ -10,23 +10,25 @@ import "./database/index";
 import SignupRoute from "./routes/signup";
 import LoginRoute from "./routes/login";
 import GetUserRoute from "./routes/user";
+import CharacterRoute from "./routes/character";
 
 const io = new Server(server, {
   cors: {
     origin: "*",
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "PATCH"],
   }
 });
 
 app.use(cors({
   origin: "*",
-  methods: ["GET", "POST"],
+  methods: ["GET", "POST", "PATCH"],
 }));
 
 app.use(express.json());
 app.use(SignupRoute);
 app.use(LoginRoute);
 app.use(GetUserRoute);
+app.use(CharacterRoute);
 
 let rooms: {
   id: string,
@@ -111,7 +113,7 @@ io.on("connection", socket => {
       to: data.to,
       from: data.from,
     });
-    console.log(room?.messages);
+
     socket.to(data._id).emit("recieve_dm", {
       isDirect: true,
       message: data.message,
@@ -127,6 +129,10 @@ io.on("connection", socket => {
       message: data.message,
       isDirect: false,
     });
+  });
+
+  socket.on("map_update", (data) => {
+    socket.to(data.room).emit("map_update", data.data);
   });
 
 })

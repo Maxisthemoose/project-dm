@@ -5,6 +5,8 @@ import { useAuthUser } from "react-auth-kit";
 import io from "socket.io-client";
 import "./Room.css";
 import Map from "../../components/Map/Map";
+import { ChatBubble } from "@mui/icons-material";
+import GameToolBar from "../../components/GameToolBar/GameToolBar";
 const socket = io("http://192.168.1.7:3001");
 
 export default function Room() {
@@ -12,6 +14,7 @@ export default function Room() {
   const params = useParams();
   const [messages, setMessages] = useState([] as any[]);
   const [users, setUsers] = useState([] as any[]);
+  const [chatOpen, setChatOpen] = useState(false);
 
   useEffect(() => {
     const user = authUser();
@@ -30,16 +33,16 @@ export default function Room() {
     });
 
     socket.on("recieve_messages", (data) => {
-      console.log(data, "in room");
       setMessages(data);
-      // socket.off("recieve_messages");
     });
 
   }, [socket]);
 
   return (
     <div className="game-window">
-      <Chat socket={socket} users={users} messages={messages} />
+      <div className="game-toolbar">
+        <GameToolBar messages={messages} socket={socket} users={users} />
+      </div>
       <Map socket={socket} />
     </div>
   )

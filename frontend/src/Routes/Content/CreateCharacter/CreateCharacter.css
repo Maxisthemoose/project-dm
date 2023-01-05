@@ -1,0 +1,17 @@
+.character-sheet {
+  /* width: 500px; */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+
+.page {
+  width: fit-content;
+  height: fit-content;
+  padding: 10px;
+  background-color: rgb(247, 247, 247);
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border-radius: 30px;
+}

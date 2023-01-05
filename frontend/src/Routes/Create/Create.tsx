@@ -10,7 +10,6 @@ export default function Create() {
 
   function createRoom() {
     const roomId = createId();
-    // window.localStorage.setItem("dmFor", roomId);
     window.location.href = `/room/${roomId}`;
   }
 
@@ -24,6 +23,7 @@ export default function Create() {
           Create a Room
         </button>
 
+        <form></form>
         <button>
           Join Room
         </button>

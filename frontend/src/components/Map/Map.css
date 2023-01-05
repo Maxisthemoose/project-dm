@@ -1,0 +1,21 @@
+.token-wrapper {
+  position: absolute !important;
+  right: 10px;
+  top: 1%;
+  z-index: 101;
+  height: 98% !important;
+  width: 150px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+  align-items: center;
+  background-color: #141619;
+  border-radius: 20px;
+}
+
+.token {
+  width: 60px;
+  height: 60px;
+  margin-top:10px;
+  margin-bottom: 10px;
+}

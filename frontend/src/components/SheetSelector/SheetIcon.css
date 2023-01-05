@@ -1,0 +1,14 @@
+.sheet-icon-wrapper {
+  background-color: rgb(236, 236, 236);
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 10px;
+}
+
+.sheet-icon-name {
+  padding: 0;
+}
+
+.sheet-icon-race {
+  padding: 0;
+}
