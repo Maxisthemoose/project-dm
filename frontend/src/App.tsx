@@ -18,7 +18,6 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/404" element={<NotFound />} />
         <Route path="/create" element={
           <RequireAuth loginPath="/">
             <Create />
@@ -44,6 +43,8 @@ function App() {
             <EditCharacter />
           </RequireAuth>
         } />
+
+        <Route path="/*" element={<NotFound />} />
       </Routes>
     </div>
   );

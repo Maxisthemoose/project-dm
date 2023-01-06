@@ -31,10 +31,17 @@ const customStyles = {
 export default function GameToolBar({ socket, users, messages }: { socket: Socket, users: any[], messages: any[] }) {
   const [chatOpen, setChatOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [userDisplay, setUserDisplay] = useState(undefined);
   return (
     <div className="chat-sidebar">
       <div className="users-in-game">
-
+        {
+          users.map(user => [
+            <div className="user-in-sidebar" onClick={() => setUserDisplay(user)}>
+              {user.username}
+            </div>
+          ])
+        }
       </div>
       <div className="util-buttons">
         <ChatBubble title="Click to open game chat." className="open-chat" onClick={() => setChatOpen(!chatOpen)} />
@@ -52,6 +59,13 @@ export default function GameToolBar({ socket, users, messages }: { socket: Socke
               <p className="click-to-copy">Click the link to copy!</p>
               <button onClick={() => navigator.clipboard.writeText(window.location.href)} className="button-copy">Copy Link</button>
             </div>
+          </div>
+        </ReactModal>
+
+        <ReactModal isOpen={userDisplay !== undefined}>
+          <div>
+            <Close className="close-user" onClick={() => setUserDisplay(undefined)} />
+
           </div>
         </ReactModal>
 

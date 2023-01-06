@@ -1,5 +1,5 @@
 import axios from "axios";
-const baseUrl = "http://192.168.1.7:3001";
+const baseUrl = "http://192.168.0.200:3001";
 
 export default async function login(userData: { usernameOrEmail?: string, username?: string, email?: string, password: string }) {
   try {

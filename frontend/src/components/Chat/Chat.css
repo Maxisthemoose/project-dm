@@ -3,7 +3,7 @@
   left: 10px;
   top: 10px;
   border-radius: 15px;
-  background-color: rgb(241, 241, 241);
+  background-color: black;
   resize: both;
   min-height: 200px;
   min-width: 300px;
@@ -26,7 +26,7 @@
 }
 
 .open-close-users {
-  fill:white;
+  fill: white;
   height: 22px;
   /* background-color: grey; */
   /* padding: 3px; */
@@ -110,17 +110,18 @@
 .chat-body::-webkit-scrollbar {
   width: 1em;
 }
- 
+
 .chat-body::-webkit-scrollbar-track {
   box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
 }
- 
+
 .chat-body::-webkit-scrollbar-thumb {
   background-color: darkgrey;
   outline: 1px solid slategrey;
 }
 
-.message-wrapper, .dm-wrapper {
+.message-wrapper,
+.dm-wrapper {
   width: fit-content;
   height: fit-content;
   padding: 5px;
@@ -158,7 +159,7 @@
   justify-self: right;
   align-self: flex-end;
   background-color: #1982FC;
-  
+
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
   border-bottom-left-radius: 10px;
@@ -166,12 +167,13 @@
 }
 
 
-.right > .author {
+.right>.author {
   align-self: flex-end;
   font-size: 13px;
   opacity: 0.5;
 }
-.left > .author {
+
+.left>.author {
   align-self: flex-start;
   font-size: 13px;
   opacity: 0.5;
@@ -216,7 +218,8 @@
 
 .send-message {
   /* width: 70px; */
-  background-color: #1982FC;;
+  background-color: #1982FC;
+  ;
   border: none;
   outline: none;
   border-radius: 10px;

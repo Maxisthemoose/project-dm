@@ -1,4 +1,6 @@
-.open-chat, .open-invite, .settings-cog {
+.open-chat,
+.open-invite,
+.settings-cog {
   width: 28px;
   height: 28px;
   fill: rgb(154, 154, 154);
@@ -6,7 +8,9 @@
   transition-delay: 0;
 }
 
-.open-chat:active, .open-invite:active, .settings-cog:active {
+.open-chat:active,
+.open-invite:active,
+.settings-cog:active {
   width: 28px;
   height: 28px;
   fill: rgb(255, 255, 255);
@@ -39,4 +43,17 @@
   align-items: center;
   justify-content: space-around;
   margin-bottom: 10px;
+}
+
+.users-in-game {
+  overflow-x: hidden;
+}
+
+.user-in-sidebar {
+  /* padding: 10px; */
+  padding: 10px;
+  overflow-x: hidden;
+  background-color: black;
+  color: white;
+  font-weight: bold;
 }

@@ -55,86 +55,81 @@ export default function Chat({ socket, users, messages, setChatOpen }: { socket:
 
 
   return (
-    <>
-      <Draggable handle=".chat-header">
-        <div className="chat-wrapper">
-          <div className="chat-header">
-            <Close onClick={() => setChatOpen(false)} className="close-chat" />
-            {/* <Menu onClick={() => setUsersOpen(false)} onTouchStart={() => setUsersOpen(false)} className="open-close-users" /> */}
-            <Popup
-              trigger={
-                <Menu className="open-close-users" />
-              }
-              // open={true}
-              arrowStyle={arrowStyle}
-              contentStyle={contentStyle}
-              modal={false}
-              closeOnDocumentClick={true}
-              closeOnEscape={true}
-              position={"left top"}
-              repositionOnResize={true}
-              on={["hover", "click", "focus"]}
-            // defaultOpen
-
-            >
-              <div className="where global-where" onClick={() => setSelectedUser("all")}>Global Chat</div>
-              {users.filter(u => u.username !== authUser()!.username).map((user, i, a) => (
-                <div className={"where" + (i === a.length - 1 ? " last-where" : "")} onClick={() =>
-                  user.username !== authUser()!.username ? setSelectedUser(user.username) : "all"}
-                  onTouchStart={() =>
-                    user.username !== authUser()!.username ? setSelectedUser(user.username) : "all"}
-                >
-                  {user.username}
-                </div>
-              ))}
-
-
-            </Popup>
-          </div>
-          {/* <ScrollToBottom className="chat-body" checkInterval={17}> */}
-          <div className="chat-body">
-            {
-              messageHistory.map(v => (
-                v.isDirect ?
-                  (v.from === authUser()!.username || v.to === authUser()!.username) ?
-                    <div className="dm-wrapper">
-                      {
-                        v.from === authUser()!.username ?
-                          (
-                            <p className="whisper">
-                              You whispered {v.message} to {v.to}
-                            </p>
-                          )
-                          :
-                          (
-                            <p className="whisper">
-                              {v.from} whispered {v.message} to you
-                            </p>
-                          )
-                      }
-                    </div>
-                    : ""
-                  :
-                  <div className={`message-wrapper ${v.author === authUser()!.username ? "right" : "left"}`}>
-                    <div className={`message`}>
-                      {v.message}
-                    </div>
-                    <div className="author">
-                      {v.author}
-                    </div>
-                  </div>
-              ))
+    <Draggable handle=".chat-header">
+      <div className="chat-wrapper">
+        <div className="chat-header">
+          <Close onClick={() => setChatOpen(false)} className="close-chat" />
+          {/* <Menu onClick={() => setUsersOpen(false)} onTouchStart={() => setUsersOpen(false)} className="open-close-users" /> */}
+          <Popup
+            trigger={
+              <Menu className="open-close-users" />
             }
-          </div>
-          {/* </ScrollToBottom> */}
-          <div className="chat-footer">
-            <form className="chat-form" onSubmit={sendMessage} >
-              <input className="message-box" type="text" id="message" name="message" placeholder={`Send a message to ${selectedUser}`} />
-              <button className="send-message" type="submit">Send</button>
-            </form>
-          </div>
+            arrowStyle={arrowStyle}
+            contentStyle={contentStyle}
+            modal={false}
+            closeOnDocumentClick={true}
+            closeOnEscape={true}
+            position={"left top"}
+            repositionOnResize={true}
+            on={["hover", "click", "focus"]}
+          >
+            <div className="where global-where" onClick={() => setSelectedUser("all")}>Global Chat</div>
+            {users.filter(u => u.username !== authUser()!.username).map((user, i, a) => (
+              <div className={"where" + (i === a.length - 1 ? " last-where" : "")} onClick={() =>
+                user.username !== authUser()!.username ? setSelectedUser(user.username) : "all"}
+                onTouchStart={() =>
+                  user.username !== authUser()!.username ? setSelectedUser(user.username) : "all"}
+              >
+                {user.username}
+              </div>
+            ))}
+
+
+          </Popup>
         </div>
-      </Draggable>
-    </>
+        {/* <ScrollToBottom className="chat-body" checkInterval={17}> */}
+        <div className="chat-body">
+          {
+            messageHistory.map(v => (
+              v.isDirect ?
+                (v.from === authUser()!.username || v.to === authUser()!.username) ?
+                  <div className="dm-wrapper">
+                    {
+                      v.from === authUser()!.username ?
+                        (
+                          <p className="whisper">
+                            You whispered {v.message} to {v.to}
+                          </p>
+                        )
+                        :
+                        (
+                          <p className="whisper">
+                            {v.from} whispered {v.message} to you
+                          </p>
+                        )
+                    }
+                  </div>
+                  : ""
+                :
+                <div className={`message-wrapper ${v.author === authUser()!.username ? "right" : "left"}`}>
+                  <div className={`message`}>
+                    {v.message}
+                  </div>
+                  <div className="author">
+                    {v.author}
+                  </div>
+                </div>
+            ))
+          }
+        </div>
+        {/* </ScrollToBottom> */}
+        <div className="chat-footer">
+          <form className="chat-form" onSubmit={sendMessage} >
+            <input className="message-box" type="text" id="message" name="message" placeholder={`Send a message to ${selectedUser}`} />
+            <button className="send-message" type="submit">Send</button>
+          </form>
+        </div>
+      </div>
+    </Draggable>
   )
 }

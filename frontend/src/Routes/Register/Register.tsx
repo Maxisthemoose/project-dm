@@ -7,6 +7,7 @@ import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
+import { Alert } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import signup from '../../api/signup';
 import { useIsAuthenticated, useSignIn } from 'react-auth-kit';
@@ -33,21 +34,26 @@ export default function Register() {
     const email = form.get("email") as string;
     const username = form.get("username") as string;
     const password = form.get("password") as string;
-    const response = await signup({ username, email, password });
-    const data = (response as any).data;
+    const response: any = await signup({ username, email, password });
 
-    if (data.created) {
-      const res = await login({ username, email, password });
-      const loginData = (res as any).data;
-      if (signIn({
-        token: loginData.accessToken,
-        expiresIn: loginData.expiresIn,
-        tokenType: "Bearer",
-        authState: {
-          username: loginData.username, email: loginData.email, id: loginData.id,
+    if (response?.response?.data?.error) {
+      setError(response?.response?.data?.error);
+      setTimeout(() => setError(""), 5000);
+    } else {
+      const data = (response as any).data;
+      if (data.created) {
+        const res = await login({ username, email, password });
+        const loginData = (res as any).data;
+        if (signIn({
+          token: loginData.accessToken,
+          expiresIn: loginData.expiresIn,
+          tokenType: "Bearer",
+          authState: {
+            username: loginData.username, email: loginData.email, id: loginData.id,
+          }
+        })) {
+          window.location.href = "/create";
         }
-      })) {
-        window.location.href = "/create";
       }
     }
 
@@ -68,6 +74,12 @@ export default function Register() {
           <Typography component="h1" variant="h5">
             <b>Create an Account</b>
           </Typography>
+          {
+            error.length > 0
+              ?
+              <Alert severity="error">{error}</Alert> :
+              ""
+          }
           <Box component="form" noValidate={false} onSubmit={handleSubmit} sx={{ mt: 3 }}>
             <Grid container spacing={2}>
               <Grid item xs={12}>

@@ -7,7 +7,7 @@ import "./Room.css";
 import Map from "../../components/Map/Map";
 import { ChatBubble } from "@mui/icons-material";
 import GameToolBar from "../../components/GameToolBar/GameToolBar";
-const socket = io("http://192.168.1.7:3001");
+const socket = io("http://192.168.0.200:3001");
 
 export default function Room() {
   const authUser = useAuthUser();
