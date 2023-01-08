@@ -18,22 +18,24 @@ export default function Room() {
 
   useEffect(() => {
     const user = authUser();
-    socket.emit("join", { room: params.id, username: user!.username, email: user!.email });
 
-    socket.on("get_users", room => {
-      socket.emit("get_users", room)
-    });
+    const roomData = {
+      room: params.id,
+      username: user!.username,
+    };
+
+    socket.emit("create_room", roomData)
+    new Promise((res) => setTimeout(() => {
+      socket.emit("join_room", roomData);
+    }, 100));
 
     socket.on("recieve_users", (data) => {
-      setUsers(data.users);
+      console.log("New users recieved");
+      setUsers(data);
     });
-
-    socket.on("get_messages", room => {
-      socket.emit("get_messages", room);
-    });
-
     socket.on("recieve_messages", (data) => {
       setMessages(data);
+      socket.off("recieve_messages");
     });
 
   }, [socket]);

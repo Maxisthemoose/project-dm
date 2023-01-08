@@ -25,8 +25,8 @@ export default function Chat({ socket, users, messages, setChatOpen }: { socket:
     const user = authUser();
 
     const form = new FormData(ev.currentTarget);
-    // console.log(form);
     const message = form.get("message") as string;
+
     if (message.length < 1) return;
     ev.currentTarget.reset();
 
@@ -35,22 +35,19 @@ export default function Chat({ socket, users, messages, setChatOpen }: { socket:
       socket.emit("send_dm", data);
       setMessageHistory(old => [...old, data]);
     } else {
-      socket.emit("message_send", { room: params.id, author: user!.username, message });
-      socket.emit("get_messages", params.id);
+      const data = { room: params.id, author: user!.username, message };
+      socket.emit("send_message", data);
+      setMessageHistory(old => [...old, data]);
     }
-
   }
 
   useEffect(() => {
-    socket.emit("get_messages", params.id);
-    socket.on("recieve_messages", (messages) => {
-      setMessageHistory(messages);
+    socket.on("recieve_message", (message) => {
+      setMessageHistory(old => [...old, message]);
     });
-
     socket.on("recieve_dm", (data) => {
       setMessageHistory(old => [...old, data]);
     });
-
   }, []);
 
 
@@ -59,7 +56,6 @@ export default function Chat({ socket, users, messages, setChatOpen }: { socket:
       <div className="chat-wrapper">
         <div className="chat-header">
           <Close onClick={() => setChatOpen(false)} className="close-chat" />
-          {/* <Menu onClick={() => setUsersOpen(false)} onTouchStart={() => setUsersOpen(false)} className="open-close-users" /> */}
           <Popup
             trigger={
               <Menu className="open-close-users" />

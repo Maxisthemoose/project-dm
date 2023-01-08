@@ -32,82 +32,72 @@ app.use(CharacterRoute);
 
 let rooms: {
   id: string,
-  users: { _id: string, username: string, email: string, isDM: boolean }[],
+  users: { _id: string, username: string, isDM: boolean }[],
   messages: { author?: string, message: string, isDirect: boolean, to?: string, from?: string }[]
 }[] = [];
 
 io.on("connection", socket => {
-  console.log("User connected");
-  socket.on("join", data => {
+
+  // CREATE a new room
+  socket.on("create_room", (data) => {
+
+    const room = rooms.find(({ id }) => id === data.room);
+    if (room !== undefined) return socket.emit("room_exists");
 
     socket.join(data.room);
 
-    const roomExists = rooms.find(v => v.id === data.room);
-    if (roomExists !== undefined) {
-      const userExists = roomExists.users.find(user => user.username === data.username && user.email === data.email);
-      if (userExists === undefined)
-        roomExists.users.push({
-          email: data.email,
-          username: data.username,
-          isDM: false,
-          _id: socket.id,
-        });
-    } else
-      rooms.push({
-        id: data.room,
-        users: [{
-          username: data.username,
-          email: data.email,
-          isDM: true,
-          _id: socket.id,
-        }],
-        messages: [],
-      });
+    console.log("New Room Created by", data.username);
 
-    io.to(data.room).emit("get_messages", data.room);
-    io.to(data.room).emit("get_users", data.room);
+    rooms.push({
+      id: data.room,
+      users: [{
+        username: data.username,
+        isDM: true,
+        _id: socket.id,
+      }],
+      messages: [],
+    });
 
   });
 
+  // Join a room that EXISTS
+  socket.on("join_room", (data) => {
+    const room = rooms.find(({ id }) => id === data.room);
+    if (room === undefined) return socket.emit("invalid_room");
 
+    socket.join(data.room);
+    console.log("Room Joined by", data.username);
 
-  socket.on("get_users", (room_id) => {
-    io.to(room_id).emit("recieve_users", rooms.find(r => r.id === room_id));
+    const userInRoom = room.users.find(({ username }) => username === data.username)
+    if (userInRoom !== undefined) return;
+
+    room.users.push({
+      _id: socket.id,
+      username: data.username,
+      isDM: false,
+    });
+
+    io.to(data.room).emit("recieve_users", room.users);
+    io.to(data.room).to(socket.id).emit("recieve_messages", room.messages);
+
   });
 
-  socket.on("get_messages", (room_id) => {
-    const room = rooms.find(r => r.id === room_id);
-    if (!room) return;
-    const messages = room.messages!;
-    io.to(room_id).emit("recieve_messages", messages);
-    // io.to(socket.id).emit("recieve_messages", messages);
-  });
+  socket.on("send_message", (data) => {
+    const room = rooms.find(({ id }) => id === data.room)!;
+    const message = {
+      isDirect: false,
+      message: data.message,
+      author: data.author,
+    };
 
+    room.messages.push(message);
 
-  socket.on("leave", (roomId) => {
-    socket.leave(roomId);
-
-    const room = rooms.find(v => v.id === roomId);
-    if (room) {
-      const index = room.users.findIndex(u => u._id === socket.id);
-      if (index !== -1)
-        room.users.splice(index, 1);
-    }
-  });
-
-  socket.on("disconnect", (r) => {
-    console.log("Socket disconnected")
-    const rm = rooms.filter(rm => rm.users.find(u => u._id === socket.id) !== undefined);
-    for (const room of rm) {
-      room.users.splice(room.users.findIndex(u => u._id === socket.id), 1);
-      socket.leave(room.id);
-      io.to(room.id).emit("recieve_users", room);
-    }
+    socket.to(data.room).emit("recieve_message", message);
   });
 
   socket.on("send_dm", data => {
-    const room = rooms.find(r => r.id === data.room)
-    room?.messages.push({
+    const room = rooms.find(r => r.id === data.room)!;
+    room.messages.push({
       isDirect: true,
       message: data.message,
       to: data.to,
@@ -122,19 +112,18 @@ io.on("connection", socket => {
     });
   });
 
-  socket.on("message_send", data => {
-    const room = rooms.find(r => r.id === data.room);
-    room?.messages.push({
-      author: data.author,
-      message: data.message,
-      isDirect: false,
-    });
+  socket.on("disconnect", (r) => {
+    const roomsUserIsIn = rooms.filter(rm => rm.users.find(u => u._id === socket.id) !== undefined);
+    for (const room of roomsUserIsIn) {
+      room.users.splice(
+        room.users.findIndex(u => u._id === socket.id),
+        1
+      );
+      socket.leave(room.id);
+      io.to(room.id).emit("recieve_users", room.users);
+    }
   });
 
-  socket.on("map_update", (data) => {
-    socket.to(data.room).emit("map_update", data.data);
-  });
-
-})
+});
 
 server.listen(3001, () => console.log("Backend started on port 3001"));
