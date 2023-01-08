@@ -14,7 +14,6 @@ export default function Room() {
   const params = useParams();
   const [messages, setMessages] = useState([] as any[]);
   const [users, setUsers] = useState([] as any[]);
-  const [chatOpen, setChatOpen] = useState(false);
 
   useEffect(() => {
     const user = authUser();
@@ -25,9 +24,9 @@ export default function Room() {
     };
 
     socket.emit("create_room", roomData)
-    new Promise((res) => setTimeout(() => {
+    setTimeout(() => {
       socket.emit("join_room", roomData);
-    }, 100));
+    }, 100);
 
     socket.on("recieve_users", (data) => {
       console.log("New users recieved");
