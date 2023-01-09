@@ -1,3 +1,7 @@
+canvas {
+  cursor: all-scroll;
+}
+
 .map-util-toolbar {
   position: absolute;
   right: 200px;
@@ -21,6 +25,10 @@
   cursor: pointer;
 }
 
+.child-util {
+  width: 25px !important;
+}
+
 .token-wrapper {
   position: absolute !important;
   right: 10px;
@@ -41,6 +49,11 @@
   height: 60px;
   margin-top: 10px;
   margin-bottom: 10px;
+  cursor: grab;
+}
+
+.token:active {
+  cursor: grabbing;
 }
 
 .open-util {

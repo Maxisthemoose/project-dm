@@ -3,6 +3,8 @@ import React, { useRef, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Socket } from "socket.io-client";
 import { Stage, Layer, Rect, Image } from "react-konva";
+// THIS WILL NEED TO BE UPDATED SO THAT ALL ARE OBJECTS WITH NAMES
+// FOR ID AND CHOOSING THE CORRECT IMAGE ON OTHER CLIENTS
 import { images as TokenImageArray } from "../../icons/tokens/tokens";
 import "./Map.css";
 import PerfectScrollBar from "react-perfect-scrollbar";
@@ -10,6 +12,7 @@ import useImage from "use-image";
 import { ReactComponent as MapDrag } from "../../icons/map-drag.svg";
 import { ReactComponent as TokenDrag } from "../../icons/token-drag.svg";
 import { ReactComponent as Arrow } from "../../icons/arrow-down.svg";
+import { v4 } from "uuid";
 import 'react-perfect-scrollbar/dist/css/styles.css';
 
 
@@ -17,27 +20,11 @@ const scaleStrength = 1.05;
 const maxScale = 20;
 const minScale = 0.1;
 
-const URLImage = ({ image }: { image: any }) => {
-  const [img] = useImage(image.src);
-  // console.log()
-  return (
-    <Image
-      image={img}
-      x={image.x}
-      y={image.y}
-      width={50}
-      height={50}
-      offsetX={(img ? 50 / 2 : 0)}
-      offsetY={(img ? 50 / 2 : 0)}
-      draggable
-    />
-  );
-};
-
 export default function Map({ socket }: { socket: Socket }) {
   const dragUrl = useRef();
+  const dragName = useRef();
   const stageRef = useRef();
-  const [images, setImages] = useState([]);
+  const [tokenImages, setTokenImages] = useState([]);
   const [utilOpen, setUtilOpen] = useState(true);
   const [canvasSize, setCanvasSize] = useState({ x: window.innerWidth, y: window.innerHeight });
   const params = useParams();
@@ -49,16 +36,81 @@ export default function Map({ socket }: { socket: Socket }) {
     // socket.emit("map_update", { room: params.id!, data: state.current });
   }
 
+  function updateClientsOnDrop(newData) {
+    socket.emit("token_array_update", { image: newData, room: params.id });
+  }
+
   useEffect(() => {
-    window.onresize = (ev) => {
+    window.onresize = (ev) => (setCanvasSize({ x: ev.target.innerWidth, y: ev.target.innerHeight }));
 
-      console.log(ev.target.innerWidth, ev.target.innerHeight);
-      setCanvasSize({ x: ev.target.innerWidth, y: ev.target.innerHeight });
-    }
-    // socket.on("map_update", (data) => {
+    socket.on("recieve_map", (data) => {
+      setTokenImages(data);
+      socket.off("recieve_map");
+    });
 
-    // });
+    socket.on("receive_map_update", (data) => {
+      setTokenImages(data);
+      console.log(tokenImages);
+    });
+
+    socket.on("receive_update_on_img_drag_end", (data) => {
+      setTokenImages(data);
+    });
   }, []);
+
+  const URLImage = ({ image }: { image: any }) => {
+    const [img] = useImage(image.src);
+    return (
+      <Image
+        image={img}
+        x={image.x}
+        y={image.y}
+        width={50}
+        height={50}
+        offsetX={(img ? 50 / 2 : 0)}
+        offsetY={(img ? 50 / 2 : 0)}
+        draggable
+        onDragMove={(evt) => {
+          const target = evt.currentTarget;
+          const identifier = target.attrs["data-identifier"].split("=");
+          const imgInArray = tokenImages.find(v => v.id === identifier[0] && v.name === identifier[1]);
+          const { x, y } = target.attrs;
+          imgInArray.x = x;
+          imgInArray.y = y;
+
+          socket.emit("update_on_img_drag_end", {
+            room: params.id,
+            data: {
+              identifier,
+              x,
+              y,
+            }
+          });
+
+        }}
+        onDragEnd={(evt) => {
+          const target = evt.currentTarget;
+          const identifier = target.attrs["data-identifier"].split("=");
+          const imgInArray = tokenImages.find(v => v.id === identifier[0] && v.name === identifier[1]);
+          const { x, y } = target.attrs;
+          imgInArray.x = x;
+          imgInArray.y = y;
+
+          socket.emit("update_on_img_drag_end", {
+            room: params.id,
+            data: {
+              identifier,
+              x,
+              y,
+            }
+          });
+
+        }}
+        // Generate a unique key so it can be referenced and updated in array
+        data-identifier={`${image.id}=${image.name}`}
+      />
+    );
+  };
 
   return (
     <div
@@ -66,22 +118,22 @@ export default function Map({ socket }: { socket: Socket }) {
       onDrop={(e) => {
         e.preventDefault();
         stageRef.current.setPointersPositions(e);
-        setImages(
-          images.concat([
-            {
-              ...stageRef.current.getRelativePointerPosition(),
-              src: dragUrl.current,
-            },
-          ])
-        );
+        const newData = {
+          ...stageRef.current.getRelativePointerPosition(),
+          src: dragUrl.current,
+          name: dragName.current,
+          id: v4(),
+        };
+        setTokenImages((old) => [...old, newData]);
+        updateClientsOnDrop(newData);
       }}
       onDragOver={(e) => e.preventDefault()}>
       <Stage
-        draggable={true}
+        draggable
         onWheel={(e) => {
           e.evt.preventDefault();
           const oldScale = stageRef.current.scaleX();
-          const pointer = stageRef.current.getRelativePointerPosition();
+          const pointer = stageRef.current.getPointerPosition();
           const pointTo = {
             x: (pointer.x - stageRef.current.x()) / oldScale,
             y: (pointer.y - stageRef.current.y()) / oldScale,
@@ -98,7 +150,6 @@ export default function Map({ socket }: { socket: Socket }) {
           }
 
           stageRef.current.position(newPos);
-          // stageRef.current.setWidth(stageRef.current.width() * newScale);
         }}
         ref={stageRef}
         width={canvasSize.x}
@@ -109,12 +160,13 @@ export default function Map({ socket }: { socket: Socket }) {
       >
 
         <Layer>
-          {/* <Rect width={window.innerWidth} height={window.innerHeight} fill="#23262b" /> */}
-          {images.map((image) =>
+          {tokenImages.map((image) =>
             <URLImage image={image} />
           )}
         </Layer>
       </Stage>
+
+
       <div className="map-util-toolbar">
         {
           utilOpen ?
@@ -125,7 +177,7 @@ export default function Map({ socket }: { socket: Socket }) {
         {
           utilOpen &&
           <>
-            <MapDrag title="Move map around" />
+            <MapDrag className="child-util" title="Move map around" />
             {/* <TokenDrag title="Move tokens on map around" /> */}
           </>
         }
@@ -134,14 +186,16 @@ export default function Map({ socket }: { socket: Socket }) {
 
       <PerfectScrollBar aria-keyshortcuts="" className="token-wrapper">
         {
-          TokenImageArray.map((v, i) => (
+          TokenImageArray.map((v, i, arr) => (
             <img
-              src={v}
+              src={v[Object.keys(v)]}
               key={`${i}-token`}
-              className="token"
+              className={`token ${Object.keys(v)[0]}`}
               draggable
+              title={Object.keys(v)[0]}
               onDragStart={(e) => {
-                (dragUrl.current as any) = (e.target as HTMLImageElement).src
+                (dragUrl.current as any) = (e.target as HTMLImageElement).src;
+                (dragName.current as any) = (e.target as HTMLImageElement).className.split(" ")[1];
               }}
             />
           ))

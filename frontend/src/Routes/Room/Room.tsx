@@ -7,7 +7,7 @@ import "./Room.css";
 import Map from "../../components/Map/Map";
 import { ChatBubble } from "@mui/icons-material";
 import GameToolBar from "../../components/GameToolBar/GameToolBar";
-console.log(process!.env.REACT_APP_BASE_URL);
+console.log(process.env.REACT_APP_BASE_URL);
 const socket = io(process.env.REACT_APP_BASE_URL!);
 
 export default function Room() {
@@ -23,7 +23,7 @@ export default function Room() {
       room: params.id,
       username: user!.username,
     };
-    console.log(roomData);
+    console.log(roomData, "AHHH");
     socket.emit("create_room", roomData)
     setTimeout(() => {
       socket.emit("join_room", roomData);

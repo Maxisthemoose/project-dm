@@ -31,7 +31,36 @@ import Warlock from "./Warlock.jpg";
 import Wizard from "./Wizard.jpg";
 
 export const images = [
-  /*{/* Aberration /*}*/,
-  /*{*/ Artificer /*}*/,
-  /*{*/ Barbarian /*}*/,
-  /*{*/ Bard /*}*/, Beast, BloodHunter, Celestial, Cleric, Construct, Dragon, Druid, Elemental, Fey, Fiend, Fighter, Giant, Goblinoid, Humanoid, Monk, Monstrosity, Ooze, Paladin, Plant, Ranger, Rogue, Shapechanger, Sorcerer, Titan, Undead, Warlock, Wizard]
+  { Abberation: Aberration },
+  { Artificer: Artificer },
+  { Barbarian: Barbarian },
+  { Bard },
+  { Beast },
+  { BloodHunter },
+  { Celestial },
+  { Cleric },
+  { Construct },
+  { Dragon },
+  { Druid },
+  { Elemental },
+  { Fey },
+  { Fiend },
+  { Fighter },
+  { Giant },
+  { Goblinoid },
+  { Humanoid },
+  { Monk },
+  { Monstrosity },
+  { Ooze },
+  { Paladin },
+  { Plant },
+  { Ranger },
+  { Rogue },
+  { Shapechanger },
+  { Sorcerer },
+  { Titan },
+  { Undead },
+  { Warlock },
+  { Wizard }];
+
+console.log(Object.keys(images));

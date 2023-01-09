@@ -34,10 +34,11 @@ let rooms: {
   id: string,
   users: { _id: string, username: string, isDM: boolean }[],
   messages: { author?: string, message: string, isDirect: boolean, to?: string, from?: string }[]
+  mapData: { src: string, name: string, id: string, x: number, y: number }[],
 }[] = [];
 
 io.on("connection", socket => {
-
+  console.log(socket.id);
   // CREATE a new room
   socket.on("create_room", (data) => {
 
@@ -57,6 +58,7 @@ io.on("connection", socket => {
         _id: socket.id,
       }],
       messages: [],
+      mapData: [],
     });
 
   });
@@ -81,7 +83,7 @@ io.on("connection", socket => {
 
     io.to(data.room).emit("recieve_users", room.users);
     io.to(data.room).to(socket.id).emit("recieve_messages", room.messages);
-
+    io.to(data.room).to(socket.id).emit("recieve_map", room.mapData);
   });
 
   socket.on("send_message", (data) => {
@@ -112,6 +114,25 @@ io.on("connection", socket => {
       to: data.to,
       from: data.from,
     });
+  });
+
+  socket.on("token_array_update", (data) => {
+    const room = rooms.find((v) => v.id === data.room);
+    room?.mapData.push(data.image);
+    socket.to(data.room).emit("receive_map_update", room?.mapData);
+  });
+
+  socket.on("update_on_img_drag_end", (data) => { // src, name, id, x, y
+    const room = rooms.find((v) => v.id === data.room);
+    // console.log(room);
+    // console.log(data);
+    const img = room?.mapData.find((v) => v.id === data.data.identifier[0] && v.name === data.data.identifier[1]);
+    if (img) {
+      img.x = data.data.x;
+      img.y = data.data.y;
+      // console.log(img);
+      socket.to(data.room).emit("receive_update_on_img_drag_end", room?.mapData);
+    }
   });
 
   socket.on("disconnect", (r) => {
