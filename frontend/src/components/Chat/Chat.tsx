@@ -16,7 +16,7 @@ const arrowStyle = { color: 'rgb(25, 25, 25)' };
 export default function Chat({ socket, users, messages, setChatOpen }: { socket: Socket; users: any[]; messages: any[], setChatOpen: Function }) {
   const authUser = useAuthUser();
   const params = useParams();
-  const [selectedUser, setSelectedUser] = useState("all");
+  const [selectedUser, setSelectedUser] = useState("everyone");
   const [messageHistory, setMessageHistory] = useState(messages);
   const [usersOpen, setUsersOpen] = useState(false);
 
@@ -30,12 +30,23 @@ export default function Chat({ socket, users, messages, setChatOpen }: { socket:
     if (message.length < 1) return;
     ev.currentTarget.reset();
 
-    if (selectedUser !== "all") {
-      const data = { room: params.id, isDirect: true, _id: users.find(u => u.username === selectedUser)._id, to: users.find(u => u.username === selectedUser).username, from: user!.username, message }
+    if (selectedUser !== "everyone") {
+      const data = {
+        room: params.id,
+        isDirect: true,
+        _id: users.find(u => u.username === selectedUser)._id,
+        to: users.find(u => u.username === selectedUser).username,
+        from: user!.username,
+        message,
+      }
       socket.emit("send_dm", data);
       setMessageHistory(old => [...old, data]);
     } else {
-      const data = { room: params.id, author: user!.username, message };
+      const data = {
+        room: params.id,
+        author: user!.username,
+        message
+      };
       socket.emit("send_message", data);
       setMessageHistory(old => [...old, data]);
     }
@@ -69,7 +80,7 @@ export default function Chat({ socket, users, messages, setChatOpen }: { socket:
             repositionOnResize={true}
             on={["hover", "click", "focus"]}
           >
-            <div className="where global-where" onClick={() => setSelectedUser("all")}>Global Chat</div>
+            <div className="where global-where" onClick={() => setSelectedUser("everyone")}>Global Chat</div>
             {users.filter(u => u.username !== authUser()!.username).map((user, i, a) => (
               <div className={"where" + (i === a.length - 1 ? " last-where" : "")} onClick={() =>
                 user.username !== authUser()!.username ? setSelectedUser(user.username) : "all"}

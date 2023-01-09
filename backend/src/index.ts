@@ -42,6 +42,7 @@ io.on("connection", socket => {
   socket.on("create_room", (data) => {
 
     const room = rooms.find(({ id }) => id === data.room);
+    console.log("???");
     if (room !== undefined) return socket.emit("room_exists");
 
     socket.join(data.room);
@@ -63,6 +64,7 @@ io.on("connection", socket => {
   // Join a room that EXISTS
   socket.on("join_room", (data) => {
     const room = rooms.find(({ id }) => id === data.room);
+    console.log("???");
     if (room === undefined) return socket.emit("invalid_room");
 
     socket.join(data.room);
@@ -126,4 +128,4 @@ io.on("connection", socket => {
 
 });
 
-server.listen(3001, () => console.log("Backend started on port 3001"));
+server.listen(3002, () => console.log("Backend started on port 3002"));

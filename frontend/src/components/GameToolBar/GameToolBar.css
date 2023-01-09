@@ -47,13 +47,29 @@
 
 .users-in-game {
   overflow-x: hidden;
+  overflow-y: scroll;
 }
+
 
 .user-in-sidebar {
   /* padding: 10px; */
-  padding: 10px;
+  /* padding: 10px; */
   overflow-x: hidden;
-  background-color: black;
-  color: white;
-  font-weight: bold;
+  /* background-color: black; */
+  color: rgb(154, 154, 154);
+  margin-top: 5px;
+  margin-bottom: 5px;
+  border-radius: 5px;
+  cursor: pointer;
 }
+.user-in-sidebar:hover {
+  background-color: #2f3238;
+}
+
+
+.user-in-sidebar > p {
+  margin: 0;
+  padding: 0;
+  font-weight: 400;
+}
+ 

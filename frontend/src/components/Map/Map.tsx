@@ -9,7 +9,7 @@ import PerfectScrollBar from "react-perfect-scrollbar";
 import useImage from "use-image";
 import { ReactComponent as MapDrag } from "../../icons/map-drag.svg";
 import { ReactComponent as TokenDrag } from "../../icons/token-drag.svg";
-
+import { ReactComponent as Arrow } from "../../icons/arrow-down.svg";
 import 'react-perfect-scrollbar/dist/css/styles.css';
 
 
@@ -17,14 +17,14 @@ const scaleStrength = 1.05;
 const maxScale = 20;
 const minScale = 0.1;
 
-const URLImage = ({ image, stageRef }: { image: any, stageRef: any }) => {
+const URLImage = ({ image }: { image: any }) => {
   const [img] = useImage(image.src);
   // console.log()
   return (
     <Image
       image={img}
-      x={image.x + stageRef.current.offsetX()}
-      y={image.y + stageRef.current.offsetY()}
+      x={image.x}
+      y={image.y}
       width={50}
       height={50}
       offsetX={(img ? 50 / 2 : 0)}
@@ -38,7 +38,8 @@ export default function Map({ socket }: { socket: Socket }) {
   const dragUrl = useRef();
   const stageRef = useRef();
   const [images, setImages] = useState([]);
-  const [stageDraggable, setStageDraggable] = useState(false);
+  const [utilOpen, setUtilOpen] = useState(true);
+  const [canvasSize, setCanvasSize] = useState({ x: window.innerWidth, y: window.innerHeight });
   const params = useParams();
   // const [state, setState] = useState({} as any);
   // const [canvasState, setCanvasState] = useState([] as any[]);
@@ -49,6 +50,11 @@ export default function Map({ socket }: { socket: Socket }) {
   }
 
   useEffect(() => {
+    window.onresize = (ev) => {
+
+      console.log(ev.target.innerWidth, ev.target.innerHeight);
+      setCanvasSize({ x: ev.target.innerWidth, y: ev.target.innerHeight });
+    }
     // socket.on("map_update", (data) => {
 
     // });
@@ -59,14 +65,11 @@ export default function Map({ socket }: { socket: Socket }) {
       className="game-space"
       onDrop={(e) => {
         e.preventDefault();
-        // register event position
         stageRef.current.setPointersPositions(e);
-        // add image
-        console.log(stageRef.current.getPointerPosition());
         setImages(
           images.concat([
             {
-              ...stageRef.current.getPointerPosition(),
+              ...stageRef.current.getRelativePointerPosition(),
               src: dragUrl.current,
             },
           ])
@@ -78,8 +81,7 @@ export default function Map({ socket }: { socket: Socket }) {
         onWheel={(e) => {
           e.evt.preventDefault();
           const oldScale = stageRef.current.scaleX();
-          const pointer = stageRef.current.getPointerPosition();
-
+          const pointer = stageRef.current.getRelativePointerPosition();
           const pointTo = {
             x: (pointer.x - stageRef.current.x()) / oldScale,
             y: (pointer.y - stageRef.current.y()) / oldScale,
@@ -94,13 +96,13 @@ export default function Map({ socket }: { socket: Socket }) {
             x: pointer.x - pointTo.x * newScale,
             y: pointer.y - pointTo.y * newScale,
           }
-          console.log(newPos);
+
           stageRef.current.position(newPos);
           // stageRef.current.setWidth(stageRef.current.width() * newScale);
         }}
         ref={stageRef}
-        width={window.innerWidth}
-        height={window.innerHeight}
+        width={canvasSize.x}
+        height={canvasSize.y}
         style={{
           backgroundColor: "#27292e",
         }}
@@ -109,14 +111,26 @@ export default function Map({ socket }: { socket: Socket }) {
         <Layer>
           {/* <Rect width={window.innerWidth} height={window.innerHeight} fill="#23262b" /> */}
           {images.map((image) =>
-            <URLImage image={image} stageRef={stageRef} />
+            <URLImage image={image} />
           )}
         </Layer>
       </Stage>
-      {/* <div className="map-util-toolbar">
-        <MapDrag title="Move map around" />
-        <TokenDrag title="Move tokens on map around" />
-      </div> */}
+      <div className="map-util-toolbar">
+        {
+          utilOpen ?
+            <Arrow className="close-util" onClick={() => setUtilOpen(false)} />
+            :
+            <Arrow className="open-util" onClick={() => setUtilOpen(true)} />
+        }
+        {
+          utilOpen &&
+          <>
+            <MapDrag title="Move map around" />
+            {/* <TokenDrag title="Move tokens on map around" /> */}
+          </>
+        }
+
+      </div>
 
       <PerfectScrollBar aria-keyshortcuts="" className="token-wrapper">
         {
