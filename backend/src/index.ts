@@ -124,15 +124,15 @@ io.on("connection", socket => {
 
   socket.on("update_on_img_drag_end", (data) => { // src, name, id, x, y
     const room = rooms.find((v) => v.id === data.room);
-    // console.log(room);
-    // console.log(data);
     const img = room?.mapData.find((v) => v.id === data.data.identifier[0] && v.name === data.data.identifier[1]);
-    if (img) {
-      img.x = data.data.x;
-      img.y = data.data.y;
-      // console.log(img);
-      socket.to(data.room).emit("receive_update_on_img_drag_end", room?.mapData);
-    }
+    setTimeout(() => {
+      if (img) {
+        img.x = data.data.x;
+        img.y = data.data.y;
+
+        socket.to(data.room).emit("receive_update_on_img_drag_end", room?.mapData);
+      }
+    }, 250);
   });
 
   socket.on("disconnect", (r) => {

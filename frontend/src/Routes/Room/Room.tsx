@@ -11,39 +11,14 @@ console.log(process.env.REACT_APP_BASE_URL);
 const socket = io(process.env.REACT_APP_BASE_URL!);
 
 export default function Room() {
-  const authUser = useAuthUser();
-  const params = useParams();
-  const [messages, setMessages] = useState([] as any[]);
-  const [users, setUsers] = useState([] as any[]);
 
-  useEffect(() => {
-    const user = authUser();
 
-    const roomData = {
-      room: params.id,
-      username: user!.username,
-    };
-    console.log(roomData, "AHHH");
-    socket.emit("create_room", roomData)
-    setTimeout(() => {
-      socket.emit("join_room", roomData);
-    }, 100);
 
-    socket.on("recieve_users", (data) => {
-      console.log("New users recieved");
-      setUsers(data);
-    });
-    socket.on("recieve_messages", (data) => {
-      setMessages(data);
-      socket.off("recieve_messages");
-    });
-
-  }, [socket]);
 
   return (
     <div className="game-window">
       <div className="game-toolbar">
-        <GameToolBar messages={messages} socket={socket} users={users} />
+        <GameToolBar socket={socket} />
       </div>
       <Map socket={socket} />
     </div>

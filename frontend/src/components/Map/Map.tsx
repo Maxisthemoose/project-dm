@@ -10,6 +10,7 @@ import "./Map.css";
 import PerfectScrollBar from "react-perfect-scrollbar";
 import useImage from "use-image";
 import { ReactComponent as MapDrag } from "../../icons/map-drag.svg";
+import { ReactComponent as ImageSelection } from "../../icons/image-selection.svg";
 import { ReactComponent as TokenDrag } from "../../icons/token-drag.svg";
 import { ReactComponent as Arrow } from "../../icons/arrow-down.svg";
 import { v4 } from "uuid";
@@ -178,6 +179,7 @@ export default function Map({ socket }: { socket: Socket }) {
           utilOpen &&
           <>
             <MapDrag className="child-util" title="Move map around" />
+            <ImageSelection className="child-util" title="Select a map background" />
             {/* <TokenDrag title="Move tokens on map around" /> */}
           </>
         }

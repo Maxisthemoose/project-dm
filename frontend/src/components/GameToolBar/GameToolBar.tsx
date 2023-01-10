@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Chat from "../Chat/Chat";
 import { ReactComponent as ChatBubble } from "../../icons/chat-bubble.svg";
 import { ReactComponent as AddUser } from "../../icons/add-user.svg";
@@ -11,6 +11,8 @@ import { DnDCharacter, DnDCharacterProfileSheet, DnDCharacterSpellSheet, DnDChar
 
 import "./GameToolBar.css";
 import 'reactjs-popup/dist/index.css';
+import { useAuthUser } from "react-auth-kit";
+import { useParams } from "react-router-dom";
 const customStyles = {
   content: {
     top: '50%',
@@ -30,16 +32,53 @@ const customStyles = {
     zIndex: 101,
   }
 };
-export default function GameToolBar({ socket, users, messages }: { socket: Socket, users: any[], messages: any[] }) {
+export default function GameToolBar({ socket }: { socket: Socket }) {
   const [chatOpen, setChatOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [userDisplay, setUserDisplay] = useState(undefined);
+
+  const authUser = useAuthUser();
+  const params = useParams();
+  const [messages, setMessages] = useState([] as any[]);
+  const [users, setUsers] = useState([] as any[]);
 
   // TODO: Get character sheet that player chose before joining lobby
   // I guess that means I'll have to have you choose a character AFTER you join... :(
   async function getUserSheets(user: any) {
 
   }
+
+  useEffect(() => {
+    const user = authUser();
+
+    const roomData = {
+      room: params.id,
+      username: user!.username,
+    };
+    console.log(roomData, "AHHH");
+    socket.emit("create_room", roomData)
+    setTimeout(() => {
+      socket.emit("join_room", roomData);
+    }, 100);
+
+    socket.on("recieve_users", (data) => {
+      console.log("New users recieved");
+      setUsers(data);
+    });
+    socket.on("recieve_messages", (data) => {
+      setMessages(data);
+      socket.off("recieve_messages");
+    });
+
+    socket.on("recieve_message", (message) => {
+      setMessages(old => [...old, message]);
+    });
+    socket.on("recieve_dm", (data) => {
+      setMessages(old => [...old, data]);
+    });
+
+  }, [socket]);
+
 
   return (
     <div className="chat-sidebar">

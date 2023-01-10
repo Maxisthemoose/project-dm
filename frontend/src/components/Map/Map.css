@@ -20,20 +20,23 @@ canvas {
 .map-util-toolbar>svg {
   margin-top: 10px;
   margin-bottom: 10px;
-  width: 30px;
+  width: 25px;
+  height: 25px;
+  stroke: none;
   fill: rgb(154, 154, 154);
+
   cursor: pointer;
 }
 
-.child-util {
+/* .child-util {
   width: 25px !important;
-}
+} */
 
 .token-wrapper {
   position: absolute !important;
   right: 10px;
   top: 1%;
-  z-index: 101;
+  z-index: 50;
   height: 98% !important;
   width: 150px;
   display: flex;

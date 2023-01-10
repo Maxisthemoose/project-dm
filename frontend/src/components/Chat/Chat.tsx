@@ -61,7 +61,6 @@ export default function Chat({ socket, users, messages, setChatOpen }: { socket:
     });
   }, []);
 
-
   return (
     <Draggable handle=".chat-header">
       <div className="chat-wrapper">
