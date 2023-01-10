@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { DnDCharacter, DnDCharacterProfileSheet, DnDCharacterSpellSheet, DnDCharacterStatsSheet } from "dnd-character-sheets";
 import getSheet from "../../../api/getSheet";
 import updateSheet from "../../../api/updateSheet";
+import deleteSheet from "../../../api/deleteSheet";
 
 export default function EditCharacter() {
   const params = useParams();
@@ -29,6 +30,11 @@ export default function EditCharacter() {
     setCharacterDataSpell(character);
     update();
   }
+  async function handleDelete() {
+    const res = await deleteSheet(authHeader(), params.id!);
+    if (res.status === 200)
+      window.location.href = "/my-content";
+  }
 
   function update() {
     setSheetToSave({
@@ -40,7 +46,9 @@ export default function EditCharacter() {
 
   async function handleSaveEdit() {
     console.log(sheetToSave, authHeader(), params.id!);
-    await updateSheet(sheetToSave, authHeader(), params.id!);
+    const res = await updateSheet(sheetToSave, authHeader(), params.id!);
+    if (res.status === 200)
+      window.location.href = "/my-content";
   }
 
   useEffect(() => {
@@ -54,12 +62,7 @@ export default function EditCharacter() {
       const res = await getSheet(header, id!);
       if (res.status === 500) window.location.href = "/404";
       setSheet(res.data.sheet.data);
-      console.log(res.data.sheet.data);
-      console.log(sheet);
-
-      console.log(loading);
       setLoading(false);
-      console.log(loading);
     })();
 
 
@@ -80,7 +83,7 @@ export default function EditCharacter() {
             <DnDCharacterSpellSheet defaultCharacter={sheet} onCharacterChanged={handleCharacterUpdateSpell} />
           </div>
           <button onClick={handleSaveEdit}>Save Character</button>
-          <button>Delete Character</button>
+          <button onClick={handleDelete}>Delete Character</button>
         </div>
         : <p>LOADING</p>}
     </>

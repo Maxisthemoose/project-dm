@@ -18,8 +18,8 @@ import 'react-perfect-scrollbar/dist/css/styles.css';
 
 
 const scaleStrength = 1.05;
-const maxScale = 20;
-const minScale = 0.1;
+const maxScale = 10;
+const minScale = 0.6;
 
 export default function Map({ socket }: { socket: Socket }) {
   const dragUrl = useRef();
@@ -29,13 +29,6 @@ export default function Map({ socket }: { socket: Socket }) {
   const [utilOpen, setUtilOpen] = useState(true);
   const [canvasSize, setCanvasSize] = useState({ x: window.innerWidth, y: window.innerHeight });
   const params = useParams();
-  // const [state, setState] = useState({} as any);
-  // const [canvasState, setCanvasState] = useState([] as any[]);
-
-  function click(evt: any) {
-    // setState(stage);
-    // socket.emit("map_update", { room: params.id!, data: state.current });
-  }
 
   function updateClientsOnDrop(newData) {
     socket.emit("token_array_update", { image: newData, room: params.id });
@@ -143,7 +136,7 @@ export default function Map({ socket }: { socket: Socket }) {
           const dir = e.evt.deltaY > 0 ? -1 : 1;
 
           const newScale = dir > 0 ? oldScale * scaleStrength : oldScale / scaleStrength;
-
+          if (newScale > maxScale || newScale < minScale) return;
           stageRef.current.scale({ x: newScale, y: newScale });
           const newPos = {
             x: pointer.x - pointTo.x * newScale,

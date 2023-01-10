@@ -31,7 +31,9 @@ export default function CreateCharacter() {
       ...characterDataSpell,
     }
     // console.log(characterSheet);
-    await saveSheet(characterSheet, header);
+    const res = await saveSheet(characterSheet, header);
+    if (res.status === 200)
+      window.location.href = "/my-content";
   }
 
   return (

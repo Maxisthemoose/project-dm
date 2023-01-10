@@ -1,10 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Chat from "../Chat/Chat";
 import { ReactComponent as ChatBubble } from "../../icons/chat-bubble.svg";
 import { ReactComponent as AddUser } from "../../icons/add-user.svg";
 import { ReactComponent as Close } from "../../icons/close.svg";
 import { ReactComponent as Settings } from "../../icons/settings.svg";
+import { ReactComponent as CharacterView } from "../../icons/character-sheet.svg";
+import { ReactComponent as Video } from "../../icons/video.svg";
+import { ReactComponent as DM } from "../../icons/dm.svg";
 import { Socket } from "socket.io-client";
+import Webcam from "react-webcam";
 import ReactModal from "react-modal";
 import PerfectScrollBar from "react-perfect-scrollbar";
 import { DnDCharacter, DnDCharacterProfileSheet, DnDCharacterSpellSheet, DnDCharacterStatsSheet } from "dnd-character-sheets";
@@ -32,37 +36,61 @@ const customStyles = {
     zIndex: 101,
   }
 };
-export default function GameToolBar({ socket }: { socket: Socket }) {
+
+const customStylesCharacterSheet: ReactModal.Styles = {
+  content: {
+    top: '50%',
+    left: '50%',
+    right: 'auto',
+    bottom: 'auto',
+    marginRight: '-50%',
+    width: "90%",
+    height: "90%",
+    backgroundColor: "white",
+    userSelect: "none",
+    transform: 'translate(-50%, -50%)',
+    zIndex: "104",
+  },
+  overlay: {
+    backgroundColor: "rgb(0,0,0,0.3)",
+    zIndex: "104",
+  }
+};
+
+
+export default function GameToolBar({ socket, character }: { socket: Socket, character: { data: DnDCharacter; _id: string; } }) {
   const [chatOpen, setChatOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [userDisplay, setUserDisplay] = useState(undefined);
+  const [characterSheetOpen, setCharacterSheetOpen] = useState(false);
+  const [conferenceOpen, setConferenceOpen] = useState(false);
 
   const authUser = useAuthUser();
   const params = useParams();
   const [messages, setMessages] = useState([] as any[]);
   const [users, setUsers] = useState([] as any[]);
-
-  // TODO: Get character sheet that player chose before joining lobby
-  // I guess that means I'll have to have you choose a character AFTER you join... :(
-  async function getUserSheets(user: any) {
-
-  }
+  const [stream, setStream] = useState<MediaStream>();
+  const myVideoRef = useRef(null as any);
 
   useEffect(() => {
-    const user = authUser();
 
+    navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+      .then((currentStream) => {
+        setStream(currentStream);
+        myVideoRef.current.srcObject = currentStream;
+      });
+
+    const user = authUser();;
     const roomData = {
       room: params.id,
       username: user!.username,
     };
-    console.log(roomData, "AHHH");
     socket.emit("create_room", roomData)
     setTimeout(() => {
       socket.emit("join_room", roomData);
     }, 100);
 
     socket.on("recieve_users", (data) => {
-      console.log("New users recieved");
       setUsers(data);
     });
     socket.on("recieve_messages", (data) => {
@@ -86,13 +114,22 @@ export default function GameToolBar({ socket }: { socket: Socket }) {
         {
           users.map(user => [
             <div className="user-in-sidebar" onClick={() => setUserDisplay(user)}>
-              <p>{user.username}</p>
+              {user.isDM && <DM className="dungeon-master" />}
+              <p>{
+                (user.isDM ?
+                  user.username.length > 6 :
+                  user.username.length > 10) ?
+                  (user.isDM ? user.username.slice(0, 6) + "..." :
+                    user.username.slice(0, 10) + "...") :
+                  user.username
+              }</p>
             </div>
           ])
         }
       </PerfectScrollBar>
       <div className="user-utilities">
-
+        <CharacterView onClick={() => setCharacterSheetOpen(true)} />
+        <Video className="video-select" onClick={() => setConferenceOpen(true)} />
       </div>
       <div className="util-buttons">
         <ChatBubble title="Click to open game chat." className="open-chat" onClick={() => setChatOpen(!chatOpen)} />
@@ -113,11 +150,34 @@ export default function GameToolBar({ socket }: { socket: Socket }) {
           </div>
         </ReactModal>
 
-        <ReactModal isOpen={userDisplay !== undefined}>
+        <ReactModal style={customStyles} isOpen={userDisplay !== undefined}>
           <div>
             <Close className="close-user" onClick={() => setUserDisplay(undefined)} />
 
 
+          </div>
+        </ReactModal>
+
+        <ReactModal style={customStylesCharacterSheet} isOpen={characterSheetOpen}>
+          <Close className="close-user" style={{ color: "black" }} onClick={() => setCharacterSheetOpen(false)} />
+          <div>
+            <DnDCharacterStatsSheet character={character.data} />
+            <DnDCharacterProfileSheet character={character.data} />
+            <DnDCharacterSpellSheet character={character.data} />
+          </div>
+        </ReactModal>
+
+        <ReactModal style={customStylesCharacterSheet} isOpen={conferenceOpen}>
+          <Close className="close-user" style={{ color: "black" }} onClick={() => setConferenceOpen(false)} />
+          <div>
+            {/* <Webcam /> */}
+            <div className="you-video">
+              {/* https://www.npmjs.com/package/simple-peer */}
+              {/* https://youtu.be/oxFr7we3LC8?t=2187 */}
+            </div>
+            <div className="other-video">
+
+            </div>
           </div>
         </ReactModal>
 

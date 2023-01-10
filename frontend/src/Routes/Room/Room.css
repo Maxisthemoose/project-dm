@@ -4,4 +4,21 @@
   overflow: hidden;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
+  background-color: #27292e;
+}
+
+
+.character-select {
+  position: absolute;
+  width: 25%;
+  height: 40%;
+  background-color: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
 }

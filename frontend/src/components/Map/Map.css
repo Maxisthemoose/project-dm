@@ -34,17 +34,17 @@ canvas {
 
 .token-wrapper {
   position: absolute !important;
-  right: 10px;
-  top: 1%;
+  right: 0;
+  top: 0;
   z-index: 50;
-  height: 98% !important;
+  height: 100%;
   width: 150px;
   display: flex;
   flex-direction: column;
   overflow-y: scroll;
   align-items: center;
   background-color: #27292e;
-  border-radius: 20px;
+  box-shadow: 0 0 10px 2px #1c1e22;
 }
 
 .token {
