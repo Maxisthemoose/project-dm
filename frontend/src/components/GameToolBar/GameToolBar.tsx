@@ -172,8 +172,8 @@ export default function GameToolBar({ socket, character }: { socket: Socket, cha
           <div>
             {/* <Webcam /> */}
             <div className="you-video">
-              {/* https://www.npmjs.com/package/simple-peer */}
-              {/* https://youtu.be/oxFr7we3LC8?t=2187 */}
+              {/* https://www.npmjs.com/package/simple-peer  */}
+              {/* https://youtu.be/oxFr7we3LC8?t=2187  */}
             </div>
             <div className="other-video">
 
